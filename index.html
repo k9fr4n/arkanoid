@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="NEON BREAKER - A modern arcade breakout game with futuristic neon aesthetics">
+  <meta name="theme-color" content="#0a0a12">
+  <title>NEON BREAKER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0a0a12;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    #game-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    #ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 10, 18, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 20;
+      pointer-events: auto;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .game-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      background: linear-gradient(135deg, #00f3ff 0%, #ff00f3 50%, #fffb00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 60px rgba(0, 243, 255, 0.5);
+      animation: titlePulse 3s ease-in-out infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes titlePulse {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.3); }
+    }
+    .game-subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: #8899aa;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+    }
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      padding: 1rem 3rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #00f3ff 0%, #0099cc 100%);
+      color: #0a0a12;
+      box-shadow: 0 0 30px rgba(0, 243, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(0, 243, 255, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: #00f3ff;
+      border: 2px solid #00f3ff;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    }
+    .btn-secondary:hover {
+      background: rgba(0, 243, 255, 0.1);
+      box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 300px;
+    }
+    .hud {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      right: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .hud-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      background: rgba(10, 10, 18, 0.8);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      border-radius: 8px;
+      padding: 0.5rem 1.5rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .hud-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: #668899;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .hud-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00f3ff;
+      text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    }
+    .hud-lives {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .life-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #ff0066 0%, #ff3399 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(255, 0, 102, 0.6);
+      animation: lifePulse 2s ease-in-out infinite;
+    }
+    .life-icon.lost {
+      opacity: 0.2;
+      background: #333;
+      box-shadow: none;
+      animation: none;
+    }
+    @keyframes lifePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .level-complete, .game-over {
+      text-align: center;
+    }
+    .level-complete h2, .game-over h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+    .level-complete h2 { color: #00ff88; text-shadow: 0 0 30px rgba(0, 255, 136, 0.5); }
+    .game-over h2 { color: #ff0066; text-shadow: 0 0 30px rgba(255, 0, 102, 0.5); }
+    .stats {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin: 2rem 0;
+      font-size: 1.2rem;
+      color: #ccdddd;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+    }
+    .stat-label { color: #668899; }
+    .stat-value { color: #00f3ff; font-family: 'Orbitron', sans-serif; font-weight: 700; }
+    .launch-hint {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      color: #00f3ff;
+      letter-spacing: 0.1em;
+      animation: blink 1.5s ease-in-out infinite;
+      pointer-events: none;
+      text-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .launch-hint.hidden { display: none; }
+    .controls-hint {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2rem;
+      font-size: 0.8rem;
+      color: #557788;
+      pointer-events: none;
+    }
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .key {
+      font-family: 'Orbitron', sans-serif;
+      background: rgba(0, 243, 255, 0.1);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: #00f3ff;
+    }
+    .multiplier-display {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(3rem, 10vw, 6rem);
+      font-weight: 900;
+      color: #fffb00;
+      text-shadow: 0 0 40px rgba(255, 251, 0, 0.6);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 30;
+    }
+    .multiplier-display.visible {
+      opacity: 1;
+      animation: multiplierPop 0.3s ease-out;
+    }
+    @keyframes multiplierPop {
+      0% { transform: translate(-50%, -50%) scale(0.5); }
+      50% { transform: translate(-50%, -50%) scale(1.2); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    @media (max-width: 768px) {
+      .hud { padding: 0.3rem 0.5rem; }
+      .hud-panel { padding: 0.4rem 1rem; }
+      .hud-value { font-size: 1.1rem; }
+      .life-icon { width: 20px; height: 20px; }
+      .controls-hint { flex-wrap: wrap; justify-content: center; gap: 1rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    <div id="ui-overlay">
+      <div class="hud" id="hud">
+        <div class="hud-panel">
+          <div class="hud-label">Score</div>
+          <div class="hud-value" id="score">0</div>
+        </div>
+        <div class="hud-panel">
+          <div class="hud-label">Level</div>
+          <div class="hud-value" id="level">1</div>
+        </div>
+        <div class="hud-panel">
+          <div class="hud-label">Lives</div>
+          <div class="hud-lives" id="lives"></div>
+        </div>
+      </div>
+      <div class="multiplier-display" id="multiplier-display">×1</div>
+      <div class="launch-hint" id="launch-hint">CLICK / TAP TO LAUNCH</div>
+      <div class="controls-hint">
+        <div class="control-item"><span class="key">← →</span> Move</div>
+        <div class="control-item"><span class="key">A / D</span> Move</div>
+        <div class="control-item"><span class="key">SPACE</span> Launch</div>
+        <div class="control-item"><span class="key">ESC</span> Pause</div>
+      </div>
+
+      <div class="screen" id="title-screen">
+        <h1 class="game-title">NEON BREAKER</h1>
+        <p class="game-subtitle">Futuristic Arcade Experience</p>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-play">Play</button>
+          <button class="btn btn-secondary" id="btn-options">Options</button>
+        </div>
+      </div>
+
+      <div class="screen hidden" id="pause-screen">
+        <h2 style="font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: #00f3ff; margin-bottom: 2rem;">PAUSED</h2>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-resume">Resume</button>
+          <button class="btn btn-secondary" id="btn-restart">Restart Level</button>
+          <button class="btn btn-secondary" id="btn-main-menu">Main Menu</button>
+        </div>
+      </div>
+
+      <div class="screen hidden level-complete" id="level-complete-screen">
+        <h2>LEVEL COMPLETE</h2>
+        <div class="stats">
+          <div class="stat-row">
+            <span class="stat-label">Score</span>
+            <span class="stat-value" id="lc-score">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Bonus</span>
+            <span class="stat-value" id="lc-bonus">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Total</span>
+            <span class="stat-value" id="lc-total">0</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-next-level">Next Level</button>
+        </div>
+      </div>
+
+      <div class="screen hidden game-over" id="game-over-screen">
+        <h2>GAME OVER</h2>
+        <div class="stats">
+          <div class="stat-row">
+            <span class="stat-label">Final Score</span>
+            <span class="stat-value" id="go-score">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Level Reached</span>
+            <span class="stat-value" id="go-level">1</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-retry">Retry</button>
+          <button class="btn btn-secondary" id="btn-main-menu-go">Main Menu</button>
+        </div>
+      </div>
+
+      <div class="screen hidden" id="options-screen">
+        <h2 style="font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: #00f3ff; margin-bottom: 2rem;">OPTIONS</h2>
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
+          <label style="display: flex; align-items: center; gap: 1rem; color: #ccdddd; font-size: 1.1rem; cursor: pointer;">
+            <input type="checkbox" id="sound-toggle" checked style="width: 24px; height: 24px; accent-color: #00f3ff;">
+            Sound Effects
+          </label>
+          <label style="display: flex; align-items: center; gap: 1rem; color: #ccdddd; font-size: 1.1rem; cursor: pointer;">
+            <input type="checkbox" id="music-toggle" checked style="width: 24px; height: 24px; accent-color: #00f3ff;">
+            Music
+          </label>
+          <label style="display: flex; align-items: center; gap: 1rem; color: #ccdddd; font-size: 1.1rem; cursor: pointer;">
+            <input type="checkbox" id="particles-toggle" checked style="width: 24px; height: 24px; accent-color: #00f3ff;">
+            Particles
+          </label>
+          <label style="display: flex; align-items: center; gap: 1rem; color: #ccdddd; font-size: 1.1rem; cursor: pointer;">
+            <input type="checkbox" id="trails-toggle" checked style="width: 24px; height: 24px; accent-color: #00f3ff;">
+            Ball Trails
+          </label>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="btn-back">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
