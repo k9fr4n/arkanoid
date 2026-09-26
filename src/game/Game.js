@@ -71,7 +71,7 @@ export class Game {
     document.getElementById('btn-back').addEventListener('click', () => this.ui.showScreen('title'));
     document.getElementById('sound-toggle').addEventListener('change', (e) => audioManager.toggleSfx(e.target.checked));
     document.getElementById('music-toggle').addEventListener('change', (e) => audioManager.toggleMusic(e.target.checked));
-    document.getElementById('particles-toggle').addEventListener('change', (e) => this.effects.particleMaterial.visible = e.target.checked);
+    document.getElementById('particles-toggle').addEventListener('change', (e) => { this.effects.particleSystem.visible = e.target.checked; });
     document.getElementById('trails-toggle').addEventListener('change', (e) => this.balls.forEach(b => b.trailEnabled = e.target.checked));
 
     // Keyboard pause
@@ -113,6 +113,9 @@ export class Game {
     this.ui.showScreen('game');
     this.loadCurrentLevel();
     this.resetBall();
+    // Focus canvas for keyboard input
+    const canvas = document.getElementById('game-canvas');
+    if (canvas) canvas.focus();
   }
 
   loadCurrentLevel() {
