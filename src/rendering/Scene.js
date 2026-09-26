@@ -13,6 +13,7 @@ export class GameScene {
 
   setupRenderer() {
     const canvas = document.getElementById('game-canvas');
+    this.camera = null;
     this.renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
@@ -69,12 +70,18 @@ export class GameScene {
     }
   }
 
-  render() {
+  render(camera = null) {
+    const activeCamera = camera || this.camera;
+    if (!activeCamera) return;
     if (this.composer) {
       this.composer.render();
     } else {
-      this.renderer.render(this.scene, this.camera);
+      this.renderer.render(this.scene, activeCamera);
     }
+  }
+
+  setCamera(camera) {
+    this.camera = camera;
   }
 
   addToArena(object) {
@@ -125,8 +132,8 @@ export class GameCamera {
       100
     );
 
-    // Position camera above and behind the arena
-    this.basePosition = new THREE.Vector3(0, 12, 18);
+    // Position camera above and behind the arena for optimal view
+    this.basePosition = new THREE.Vector3(0, 15, 22);
     this.targetPosition = new THREE.Vector3(0, 0, 0);
     this.camera.position.copy(this.basePosition);
     this.camera.lookAt(this.targetPosition);

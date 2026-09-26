@@ -83,7 +83,7 @@ export class CollisionSystem {
 
     // Screen shake for impact
     if (destroyed && (type === 2 || type === 3)) { // Reinforced or special
-      this.effects.scene.camera.shake(0.2, 0.2);
+      if (this.game && this.game.camera) this.game.camera.shake(0.2, 0.2);
     }
   }
 

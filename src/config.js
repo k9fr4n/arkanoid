@@ -31,7 +31,7 @@ export const CONFIG = {
     TRAIL_LENGTH: 12,
     MIN_ANGLE: 0.25, // radians - prevent near-horizontal
     MAX_ANGLE: 1.3,  // radians - prevent near-vertical
-    LAUNCH_ANGLE: -Math.PI / 2 // straight up
+    LAUNCH_ANGLE: 0 // straight up (velocity = sin/cos mapping, 0 = up)
   },
 
   // Brick settings
@@ -98,7 +98,7 @@ export const CONFIG = {
     GRID: 0x002244,
     PADDLE: 0x00ffff,
     PADDLE_EMISSIVE: 0x0088cc,
-    BALL: 0xffffff,
+    BALL: 0x00ffff,     // Vivid neon cyan for maximum visibility
     BALL_EMISSIVE: 0x00f3ff,
     TRAIL: 0x00f3ff,
     PARTICLE: 0x00f3ff

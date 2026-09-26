@@ -194,10 +194,10 @@ export class AudioManager {
   // Background music - ambient synth
   playMusic() {
     if (!this.enabled || !this.musicEnabled || !this.audioContext || this.isPlayingMusic) return;
-    this.isPlayingMusic = true;
 
     // Stop any existing music
     this.stopMusic();
+    this.isPlayingMusic = true;
 
     const chords = [
       [130.81, 196.00, 261.63], // C minor

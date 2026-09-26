@@ -21,7 +21,7 @@ export class Ball {
     this.magnetTarget = null;
     this.trailEnabled = true;
     this.lastPaddleHit = 0;
-
+    
     this.createMesh();
     this.reset();
   }
@@ -30,21 +30,21 @@ export class Ball {
     // Main ball geometry
     const geometry = new THREE.SphereGeometry(this.radius, 32, 32);
 
-    // Core material
+    // Core material - vivid neon colors using MeshBasicMaterial
     this.coreMaterial = createGlowMaterial(
       CONFIG.COLORS.BALL,
       CONFIG.COLORS.BALL_EMISSIVE,
-      2
+      3  // Higher intensity for vividness
     );
 
     this.mesh = new THREE.Mesh(geometry, this.coreMaterial);
     this.mesh.castShadow = false;
     this.mesh.receiveShadow = false;
 
-    // Glow aura
+    // Glow aura - make it more visible
     const auraGeometry = new THREE.SphereGeometry(this.radius * 1.5, 16, 16);
-    this.auraMaterial = createNeonMaterial(CONFIG.COLORS.BALL_EMISSIVE, 1);
-    this.auraMaterial.opacity = 0.3;
+    this.auraMaterial = createNeonMaterial(CONFIG.COLORS.BALL_EMISSIVE, 1.5);
+    this.auraMaterial.opacity = 0.5;
     this.aura = new THREE.Mesh(auraGeometry, this.auraMaterial);
     this.mesh.add(this.aura);
 
@@ -205,7 +205,7 @@ export class Ball {
     // Center hit = straight up, edge hits = angled
     const relativeHit = hitPosition / (paddle.width / 2); // -1 to 1
     const maxAngle = CONFIG.BALL.MAX_ANGLE;
-    const bounceAngle = -Math.PI / 2 + relativeHit * maxAngle * CONFIG.PHYSICS.BALL_PADDLE_ANGLE_FACTOR;
+    const bounceAngle = relativeHit * maxAngle * CONFIG.PHYSICS.BALL_PADDLE_ANGLE_FACTOR;
 
     this.velocity.set(Math.sin(bounceAngle), Math.cos(bounceAngle), 0).normalize();
 

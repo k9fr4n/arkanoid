@@ -293,19 +293,20 @@ export class EffectsManager {
   }
 }
 
-// Glow effect for objects
+// Glow effect for objects - using MeshBasicMaterial for vivid neon colors
 export function createGlowMaterial(baseColor, emissiveColor, intensity = 1) {
-  return new THREE.MeshPhysicalMaterial({
+  // Use MeshBasicMaterial with additive blending for vivid neon colors
+  // that don't depend on lighting conditions
+  const material = new THREE.MeshBasicMaterial({
     color: baseColor,
     emissive: emissiveColor,
     emissiveIntensity: intensity,
-    metalness: 0.3,
-    roughness: 0.2,
-    clearcoat: 1,
-    clearcoatRoughness: 0.1,
-    transmission: 0.1,
-    thickness: 0.5
+    transparent: true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
   });
+  return material;
 }
 
 export function createNeonMaterial(color, glowIntensity = 1.5) {

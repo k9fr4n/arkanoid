@@ -1,7 +1,7 @@
 // Brick entity
 import * as THREE from 'three';
 import { CONFIG, getBrickType } from '../config.js';
-import { createGlowMaterial, createStandardMaterial } from '../rendering/Effects.js';
+import { createGlowMaterial, createStandardMaterial, createNeonMaterial } from '../rendering/Effects.js';
 
 export class Brick {
   constructor(scene, effects, audio, typeId, x, y, z) {

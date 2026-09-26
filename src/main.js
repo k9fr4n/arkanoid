@@ -6,9 +6,10 @@ let game = null;
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Check WebGL support
-  const canvas = document.getElementById('game-canvas');
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  // Check WebGL support (use an offscreen canvas so we don't steal
+  // the game canvas context before Three.js creates its renderer)
+  const testCanvas = document.createElement('canvas');
+  const gl = testCanvas.getContext('webgl2') || testCanvas.getContext('webgl');
   if (!gl) {
     document.body.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a12;color:#00f3ff;font-family:'Orbitron',sans-serif;text-align:center;padding:2rem;">

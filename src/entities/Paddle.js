@@ -47,6 +47,7 @@ export class Paddle {
     this.roundGeometry(edgeGeometry);
     const edgeMaterial = createNeonMaterial(CONFIG.COLORS.PADDLE, 1.5);
     edgeMaterial.opacity = 0.4;
+    this.edgeMaterial = edgeMaterial;
     this.edgeMesh = new THREE.Mesh(edgeGeometry, edgeMaterial);
     this.mesh.add(this.edgeMesh);
 
@@ -88,6 +89,7 @@ export class Paddle {
     const shieldMaterial = createNeonMaterial(0xff00f3, 2);
     shieldMaterial.opacity = 0;
     shieldMaterial.side = THREE.DoubleSide;
+    this.shieldMaterial = shieldMaterial;
     this.shieldMesh = new THREE.Mesh(shieldGeometry, shieldMaterial);
     this.shieldMesh.position.set(0, this.height / 2 + 0.1, 0);
     this.shieldMesh.rotation.x = -Math.PI / 2;
@@ -95,9 +97,26 @@ export class Paddle {
   }
 
   update(deltaTime, inputX) {
-    // Smooth movement toward target
-    this.targetX = Math.max(-this.maxX, Math.min(this.maxX, inputX * this.maxX));
-    this.currentX += (this.targetX - this.currentX) * Math.min(1, deltaTime * 15);
+    // Target movement with inertia - doesn't snap to center when input stops
+    // Only update target when there's actual input
+    if (inputX !== 0) {
+      this.targetX = Math.max(-this.maxX, Math.min(this.maxX, inputX * this.maxX));
+      this.currentX = this.targetX; // Snap to target when actively moving
+    }
+    // When no input, apply friction - paddle coasts to stop naturally
+    // rather than being pulled to center
+    const inputDeadzone = 0.1;
+    const effectiveInput = Math.abs(inputX) > inputDeadzone ? inputX : 0;
+    
+    // Simple inertia: when no input, gradually slow down
+    if (effectiveInput === 0 && this.currentX !== 0) {
+      // Decelerate naturally
+      const decel = deltaTime * 10;
+      this.currentX += Math.sign(this.currentX) * -decel;
+      // Clamp to max range
+      this.currentX = Math.max(-this.maxX, Math.min(this.maxX, this.currentX));
+    }
+    
     this.mesh.position.x = this.currentX;
 
     // Update wide power-up

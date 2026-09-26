@@ -19,6 +19,7 @@ export class Game {
     this.input = new InputManager();
     this.scene = new GameScene();
     this.camera = new GameCamera(this.scene.scene);
+    this.scene.setCamera(this.camera.getCamera());
     this.lighting = new GameLighting(this.scene.scene);
     this.effects = new EffectsManager(this.scene);
     this.ui = new UIManager(this);
@@ -196,8 +197,8 @@ export class Game {
 
       for (let i = 0; i < count; i++) {
         const newBall = this.createBall();
-        // Launch in slightly different directions
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+        // Launch in slightly different directions (0 = straight up)
+        const angle = (Math.random() - 0.5) * 0.5;
         newBall.launch(angle);
         newBall.speed = this.balls[0].speed;
       }

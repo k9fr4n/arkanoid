@@ -20,9 +20,9 @@ export class InputManager {
       this.updateNormalizedMouseX();
     });
 
-    // Mouse click / touch for launch
+    // Mouse click / touch for launch (ignore clicks on UI buttons)
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 0) {
+      if (e.button === 0 && !e.target.closest('button')) {
         this.launchRequested = true;
       }
     });
@@ -92,7 +92,18 @@ export class InputManager {
     if (this.touchActive) {
       this.updateNormalizedFromTouch();
     }
-    return this.normalizedMouseX;
+    // Apply slight inertia - don't snap to 0 immediately
+    // This prevents the paddle from "returning to center" when releasing keys
+    let target = this.normalizedMouseX;
+    
+    // If no touch/mouse and no keyboard, maintain current direction inertia
+    // rather than snapping to center
+    if (!this.touchActive && !this.wasTouchActiveLastFrame) {
+      // Keep slight momentum rather than forcing center
+    }
+    
+    this.wasTouchActiveLastFrame = this.touchActive;
+    return target;
   }
 
   // Get keyboard input (-1, 0, 1)

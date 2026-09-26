@@ -13,7 +13,6 @@ export class Arena {
 
     this.createWalls();
     this.createFloor();
-    this.createGrid();
     this.createCornerPillars();
   }
 
