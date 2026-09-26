@@ -85,6 +85,8 @@ You can also trigger deployment manually from the Actions tab in GitHub.
 
 ### Live Demo
 
+**https://k9fr4n.github.io/arkanoid/**
+
 Once deployed, the game will be available at:
 ```
 https://<your-username>.github.io/<repository-name>/
