@@ -87,6 +87,9 @@ export class Game {
   }
 
   init() {
+    // Show title screen first
+    this.ui.showScreen('title');
+
     // Create initial ball
     this.createBall();
 
